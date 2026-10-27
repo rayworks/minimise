@@ -1,43 +1,33 @@
 import co.joebirch.minimise.buildsrc.*
 
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 android {
-    compileSdkVersion Versions.compileSdk
+    namespace = 'co.joebirch.minimise.common_ui'
+    compileSdk = Versions.compileSdk
 
     defaultConfig {
-        minSdkVersion Versions.minSdk
+        minSdk = Versions.minSdk
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     buildFeatures {
-        compose true
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
-        useIR = true
-    }
-
-    composeOptions {
-        kotlinCompilerVersion Deps.Kotlin.version
-        kotlinCompilerExtensionVersion Deps.Compose.version
+        compose = true
     }
 }
 
 dependencies {
     implementation project(":platform_android:design")
 
+    implementation platform(Deps.Compose.bom)
     implementation Deps.Compose.material
     implementation Deps.Compose.layout
     implementation Deps.Compose.foundation
     implementation Deps.Compose.runtime
     implementation Deps.Compose.tooling
-
-    implementation Deps.Kotlin.stdLib
 }

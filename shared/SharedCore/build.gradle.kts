@@ -1,66 +1,61 @@
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
 import co.joebirch.minimise.buildsrc.Deps
-import co.joebirch.minimise.buildsrc.Versions
 
 plugins {
     kotlin("multiplatform")
-    id("kotlinx-serialization")
+    kotlin("plugin.serialization")
 }
 
 kotlin {
-    //select iOS target platform depending on the Xcode environment variables
-    val iOSTarget: (String, KotlinNativeTarget.() -> Unit) -> KotlinNativeTarget =
-        if (System.getenv("SDK_NAME")?.startsWith("iphoneos") == true)
-            ::iosArm64
-        else
-            ::iosX64
+    jvm()
 
-    iOSTarget("ios") {
-        binaries {
-            framework {
-                baseName = "SharedCode"
-            }
+    //select iOS target platform depending on the Xcode environment variables
+    val iosTarget =
+        if (System.getenv("SDK_NAME")?.startsWith("iphoneos") == true)
+            iosArm64()
+        else
+            iosSimulatorArm64()
+
+    iosTarget.binaries {
+        framework {
+            baseName = "SharedCode"
         }
     }
 
-    jvm("android")
+    sourceSets {
+        commonMain.dependencies {
+            implementation(Deps.Coroutines.core)
+        }
 
-    sourceSets["commonMain"].dependencies {
-        implementation(Deps.Kotlin.common)
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-common:1.3.3")
-    }
-
-    sourceSets["androidMain"].dependencies {
-        implementation(Deps.Kotlin.stdLib)
-    }
-
-    sourceSets["iosMain"].dependencies {
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-native:1.3.3")
-
-        api(project(":shared:SharedAuthentication"))
+        iosMain.dependencies {
+            api(project(":shared:SharedAuthentication"))
+        }
     }
 }
 
-
-val packForXcode by tasks.creating(Sync::class) {
+val packForXcode = tasks.register<Sync>("packForXcode") {
     group = "build"
 
     //selecting the right configuration for the iOS framework depending on the Xcode environment variables
     val mode = System.getenv("CONFIGURATION") ?: "DEBUG"
-    val framework = kotlin.targets.getByName<KotlinNativeTarget>("ios").binaries.getFramework(mode)
+    val framework = kotlin.targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget>()
+        .single().binaries.getFramework(NativeBuildType.valueOf(mode.uppercase()))
 
     inputs.property("mode", mode)
-    dependsOn(framework.linkTask)
+    dependsOn(framework.linkTaskProvider)
 
-    val targetDir = File(buildDir, "xcode-frameworks")
-    from({ framework.outputDirectory })
+    val targetDir = layout.buildDirectory.dir("xcode-frameworks")
+    from(framework.outputDirectory)
     into(targetDir)
 
+    /// generate a helpful ./gradlew wrapper with embedded Java path
+    val javaHome = System.getProperty("java.home")
+    val rootDir = rootProject.rootDir
     doLast {
-        val gradlew = File(targetDir, "gradlew")
-        gradlew.writeText("#!/bin/bash\nexport 'JAVA_HOME=${System.getProperty("java.home")}'\ncd '${rootProject.rootDir}'\n./gradlew \$@\n")
+        val gradlew = targetDir.get().file("gradlew").asFile
+        gradlew.writeText("#!/bin/bash\nexport 'JAVA_HOME=$javaHome'\ncd '$rootDir'\n./gradlew \$@\n")
         gradlew.setExecutable(true)
     }
 }
 
-tasks.getByName("build").dependsOn(packForXcode)
+tasks.named("build") { dependsOn(packForXcode) }

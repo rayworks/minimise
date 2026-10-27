@@ -55,9 +55,10 @@ fun CreationContent(
 ) {
     MinimiseTheme {
         Scaffold(
-            content = {
+            content = { padding ->
                 Box(
                     modifier = Modifier
+                        .padding(padding)
                         .fillMaxSize()
                         .background(MaterialTheme.colors.primary)
                 ) {
@@ -313,7 +314,7 @@ private fun categoriesStepComposable(
 private fun positiveStepComposable(
     creationState: CreationState
 ) {
-    val focusModifiers = listOf(FocusRequester(), FocusRequester(), FocusRequester())
+    val focusModifiers = remember { listOf(FocusRequester(), FocusRequester(), FocusRequester()) }
 
     CreationStep(title = R.string.title_positive_reasons) {
         labelTextField(
@@ -335,7 +336,7 @@ private fun positiveStepComposable(
 @Composable
 internal fun negativeStepComposable(
 ) {
-    val focusModifiers = listOf(FocusRequester(), FocusRequester(), FocusRequester())
+    val focusModifiers = remember { listOf(FocusRequester(), FocusRequester(), FocusRequester()) }
 
     CreationStep(title = R.string.title_negative_reasons) {
         labelTextField(

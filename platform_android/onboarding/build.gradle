@@ -1,32 +1,26 @@
 import co.joebirch.minimise.buildsrc.*
 
 apply plugin: "com.android.library"
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-kapt'
-apply plugin: 'dagger.hilt.android.plugin'
+apply plugin: 'com.google.devtools.ksp'
+apply plugin: 'com.google.dagger.hilt.android'
 
 android {
-    compileSdkVersion Versions.compileSdk
+    namespace = 'co.joebirch.minimise.onboarding'
+    compileSdk = Versions.compileSdk
 
-    viewBinding {
-        enabled = true
+    buildFeatures {
+        viewBinding = true
     }
 
     defaultConfig {
-        minSdkVersion Versions.minSdk
-        targetSdkVersion Versions.targetSdk
+        minSdk = Versions.minSdk
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 
@@ -40,8 +34,7 @@ dependencies {
     implementation Deps.AndroidX.appCompat
 
     implementation Deps.Google.Hilt.hilt
-    implementation Deps.Google.Hilt.viewmodel
-    kapt Deps.Google.Hilt.hiltCompiler
+    ksp Deps.Google.Hilt.hiltCompiler
 
     implementation Deps.Lifecycle.viewModelKtx
 

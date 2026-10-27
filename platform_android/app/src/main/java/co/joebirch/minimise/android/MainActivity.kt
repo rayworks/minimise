@@ -4,7 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.collectAsState
-import androidx.hilt.navigation.compose.hiltNavGraphViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.compose.*
 import co.joebirch.minimise.authentication.Authentication
 import co.joebirch.minimise.authentication.reset_password.ResetPasswordUI
@@ -45,16 +45,12 @@ class MainActivity : AppCompatActivity() {
                     ) {
                         composable(AuthenticationDirections.authentication.destination) {
                             Authentication(
-                                navController.hiltNavGraphViewModel(
-                                    route = AuthenticationDirections.authentication.destination
-                                )
+                                hiltViewModel()
                             )
                         }
                         composable(AuthenticationDirections.forgotPassword.destination) {
                             ResetPasswordUI(
-                                navController.hiltNavGraphViewModel(
-                                    route = AuthenticationDirections.forgotPassword.destination
-                                )
+                                hiltViewModel()
                             )
                         }
                     }
@@ -64,16 +60,12 @@ class MainActivity : AppCompatActivity() {
                     ) {
                         composable(AuthenticationDirections.dashboard.destination) {
                             Dashboard(
-                                navController.hiltNavGraphViewModel(
-                                    route = AuthenticationDirections.dashboard.destination
-                                )
+                                hiltViewModel()
                             )
                         }
                         composable(DashboardDirections.creation.destination) {
                             Creation(
-                                navController.hiltNavGraphViewModel(
-                                    route = DashboardDirections.creation.destination
-                                )
+                                hiltViewModel()
                             )
                         }
                     }

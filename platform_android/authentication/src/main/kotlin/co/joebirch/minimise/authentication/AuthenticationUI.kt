@@ -62,7 +62,7 @@ fun AuthenticationUI(
                 modifier = Modifier
                     .width(240.dp)
                     .align(Alignment.CenterHorizontally)
-                    .focusModifier()
+                    .focusTarget()
                     .focusable(true)
                     .focusRequester(titleFocusRequest)
                     .onFocusChanged {

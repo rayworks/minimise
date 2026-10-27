@@ -1,6 +1,6 @@
 package co.joebirch.minimise.navigation
 
-import androidx.navigation.compose.NamedNavArgument
+import androidx.navigation.NamedNavArgument
 
 interface NavigationCommand {
 

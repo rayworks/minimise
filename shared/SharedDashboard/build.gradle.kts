@@ -1,88 +1,67 @@
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
 import co.joebirch.minimise.buildsrc.Deps
-import co.joebirch.minimise.buildsrc.Versions
 
 plugins {
-    id("org.jetbrains.kotlin.native.cocoapods")
     kotlin("multiplatform")
 }
 
-repositories {
-    google()
-    jcenter()
-    mavenCentral()
-}
-
-
 kotlin {
-    val iOSTarget: (String, KotlinNativeTarget.() -> Unit) -> KotlinNativeTarget =
-        if (System.getenv("SDK_NAME")?.startsWith("iphoneos") == true)
-            ::iosArm64
-        else
-            ::iosX64
+    jvm()
 
-    iOSTarget("ios") {
-        binaries {
-            framework("Authentication") {
-                baseName = "Authentication"
-            }
+    val iosTarget =
+        if (System.getenv("SDK_NAME")?.startsWith("iphoneos") == true)
+            iosArm64()
+        else
+            iosSimulatorArm64()
+
+    iosTarget.binaries {
+        framework("Authentication") {
+            baseName = "Authentication"
         }
     }
 
-    jvm("android")
+    sourceSets {
+        commonMain.dependencies {
+            implementation(Deps.Coroutines.core)
+            implementation(project(":shared:SharedCommon"))
+        }
 
-    sourceSets["commonMain"].dependencies {
-        implementation(Deps.Kotlin.common)
-        implementation(Deps.Coroutines.core)
-        implementation(project(":shared:SharedCommon"))
-//        implementation(project(":FirebaseAuthentication"))
-    }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(Deps.Coroutines.core)
+            implementation(Deps.Coroutines.test)
+        }
 
-    sourceSets["commonTest"].dependencies {
-      //  implementation(project(":FirebaseAuthentication"))
-        implementation(kotlin("test"))
-        implementation(kotlin("test-junit"))
-        implementation(Deps.junit)
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3")
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.3")
-    }
-
-    sourceSets["androidMain"].dependencies {
-        implementation(Deps.Kotlin.stdLib)
-        implementation(Deps.Coroutines.android)
-    }
-
-    sourceSets["iosMain"].dependencies {
-        implementation(Deps.Kotlin.stdLib)
-
+        jvmMain.dependencies {
+            implementation(Deps.Coroutines.android)
+        }
     }
 }
 
-val packForXcode by tasks.creating(Sync::class) {
-    val targetDir = File(buildDir, "xcode-frameworks")
+val packForXcode = tasks.register<Sync>("packForXcode") {
+    val targetDir = layout.buildDirectory.dir("xcode-frameworks")
 
     /// selecting the right configuration for the iOS
     /// framework depending on the environment
     /// variables set by Xcode build
     val mode = System.getenv("CONFIGURATION") ?: "DEBUG"
-    val framework = kotlin.targets
-        .getByName<KotlinNativeTarget>("ios")
-        .binaries.getFramework(mode)
+    val framework = kotlin.targets.withType<KotlinNativeTarget>()
+        .single().binaries.getFramework("Authentication", NativeBuildType.valueOf(mode.uppercase()))
     inputs.property("mode", mode)
-    dependsOn(framework.linkTask)
+    dependsOn(framework.linkTaskProvider)
 
-    from({ framework.outputDirectory })
+    from(framework.outputDirectory)
     into(targetDir)
 
     /// generate a helpful ./gradlew wrapper with embedded Java path
+    val javaHome = System.getProperty("java.home")
+    val rootDir = rootProject.rootDir
     doLast {
-        val gradlew = File(targetDir, "gradlew")
-        gradlew.writeText("#!/bin/bash\n"
-                + "export 'JAVA_HOME=${System.getProperty("java.home")}'\n"
-                + "cd '${rootProject.rootDir}'\n"
-                + "./gradlew \$@\n")
+        val gradlew = targetDir.get().file("gradlew").asFile
+        gradlew.writeText("#!/bin/bash\nexport 'JAVA_HOME=$javaHome'\ncd '$rootDir'\n./gradlew \$@\n")
         gradlew.setExecutable(true)
     }
 }
 
-tasks.getByName("build").dependsOn(packForXcode)
+tasks.named("build") { dependsOn(packForXcode) }

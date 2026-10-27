@@ -1,8 +1,6 @@
 package co.joebirch.minimise.authentication.remote
 
 import co.joebirch.minimise.authentication.model.AuthenticationModel
-import com.apollographql.apollo.ApolloClient
-import com.apollographql.apollo.api.ApolloExperimental
 
 interface AuthenticationRemote {
 

@@ -140,8 +140,8 @@ private fun DashboardContent(
                     }
                 }
             },
-            content = {
-                Box {
+            content = { padding ->
+                Box(modifier = Modifier.padding(padding)) {
                     Column {
                         Box(
                             modifier = Modifier.background(Color.White)

@@ -1,29 +1,31 @@
 import co.joebirch.minimise.buildsrc.*
 
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-kapt'
+apply plugin: 'com.google.devtools.ksp'
 
 android {
-    compileSdkVersion Versions.compileSdk
+    namespace = 'co.joebirch.minimise.android.core'
+    compileSdk = Versions.compileSdk
 
     defaultConfig {
 
-        minSdkVersion Versions.minSdk
-        targetSdkVersion Versions.targetSdk
+        minSdk = Versions.minSdk
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 
 dependencies {
     implementation Deps.AndroidX.appCompat
+    implementation Deps.Lifecycle.livedata
 
     implementation Deps.Google.Hilt.hilt
-    kapt Deps.Google.Hilt.hiltCompiler
+    ksp Deps.Google.Hilt.hiltCompiler
 
-    implementation Deps.Kotlin.stdLib
-
-    implementation "androidx.datastore:datastore-preferences:1.0.0-alpha08"
+    implementation Deps.AndroidX.datastorePreferences
 }

@@ -2,43 +2,36 @@ import co.joebirch.minimise.buildsrc.Deps
 import co.joebirch.minimise.buildsrc.Versions
 
 apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
-apply plugin: 'dagger.hilt.android.plugin'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+apply plugin: 'com.google.devtools.ksp'
+apply plugin: 'com.google.dagger.hilt.android'
 
 android {
-    compileSdkVersion Versions.compileSdk
+    namespace = 'co.joebirch.minimise.android'
+    compileSdk = Versions.compileSdk
 
     defaultConfig {
-        applicationId "co.joebirch.minimise"
-        minSdkVersion Versions.minSdk
-        targetSdkVersion Versions.targetSdk
-        versionCode 1
-        versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        applicationId = "co.joebirch.minimise"
+        minSdk = Versions.minSdk
+        targetSdk = Versions.targetSdk
+        versionCode = 1
+        versionName = "1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    packagingOptions {
-        exclude 'META-INF/*.kotlin_module'
+    packaging {
+        resources {
+            excludes += 'META-INF/*.kotlin_module'
+        }
     }
 
     buildFeatures {
-        compose true
+        compose = true
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
-        useIR = true
-    }
-
-    composeOptions {
-        kotlinCompilerVersion Deps.Kotlin.version
-        kotlinCompilerExtensionVersion Deps.Compose.version
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 
@@ -56,16 +49,15 @@ dependencies {
     implementation project(':shared:SharedAuthentication')
     implementation project(':shared:SharedDashboard')
 
+    implementation platform(Deps.Compose.bom)
     implementation Deps.Compose.livedata
+    implementation Deps.AndroidX.activityCompose
     implementation Deps.Navigation.compose
-    implementation Deps.Kotlin.stdLib
     implementation Deps.Google.material
     api Deps.AndroidX.appCompat
     api Deps.AndroidX.coreKtx
 
     implementation Deps.Google.Hilt.hilt
-    implementation Deps.Google.Hilt.viewmodel
-    implementation Deps.Google.Hilt.hiltNavigationCompose
-    kapt Deps.Google.Hilt.compiler
-    kapt Deps.Google.Hilt.hiltCompiler
+    implementation Deps.Google.Hilt.viewModelCompose
+    ksp Deps.Google.Hilt.hiltCompiler
 }

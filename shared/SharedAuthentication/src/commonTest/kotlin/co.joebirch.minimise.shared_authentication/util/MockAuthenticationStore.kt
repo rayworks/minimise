@@ -26,10 +26,4 @@ internal class MockAuthenticationStore : AuthenticationRemote {
         email: String,
         password: String
     ) = whenSignIn(email, password)
-
-    override fun resetPassword(
-        apiKey: String,
-        emailAddress: String) {
-        TODO("Not yet implemented")
-    }
 }

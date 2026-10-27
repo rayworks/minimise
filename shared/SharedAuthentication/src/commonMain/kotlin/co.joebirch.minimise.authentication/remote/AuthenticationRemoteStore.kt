@@ -6,24 +6,14 @@ import co.joebirch.minimise.SignUpMutation
 import co.joebirch.minimise.authentication.mapper.toAuthenticationModel
 import co.joebirch.minimise.authentication.model.AuthenticationModel
 import com.apollographql.apollo.ApolloClient
-import com.apollographql.apollo.api.ApolloExperimental
-import com.apollographql.apollo.network.http.ApolloHttpNetworkTransport
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.single
 
-@ExperimentalCoroutinesApi
-@ApolloExperimental
 open class AuthenticationRemoteStore : AuthenticationRemote {
 
-    private val apolloClient = ApolloClient(
-        networkTransport = ApolloHttpNetworkTransport(
-            serverUrl = BuildKonfig.apiUrl,
-            headers = mapOf(
-                "Accept" to "application/json",
-                "Content-Type" to "application/json"
-            )
-        )
-    )
+    private val apolloClient = ApolloClient.Builder()
+        .serverUrl(BuildKonfig.apiUrl)
+        .addHttpHeader("Accept", "application/json")
+        .addHttpHeader("Content-Type", "application/json")
+        .build()
 
     override suspend fun signUp(
         apiKey: String,
@@ -34,7 +24,7 @@ open class AuthenticationRemoteStore : AuthenticationRemote {
             emailAddress = emailAddress,
             password = password
         )
-        val s = apolloClient.mutate(signUp).execute().single()
+        val s = apolloClient.mutation(signUp).execute()
         return s.data?.createUser?.toAuthenticationModel()
             ?: AuthenticationModel()
     }
@@ -48,7 +38,7 @@ open class AuthenticationRemoteStore : AuthenticationRemote {
             emailAddress = emailAddress,
             password = password
         )
-        return apolloClient.query(repositoriesQuery).execute().single().data?.login
+        return apolloClient.query(repositoriesQuery).execute().data?.login
             ?.toAuthenticationModel() ?: AuthenticationModel()
     }
 }

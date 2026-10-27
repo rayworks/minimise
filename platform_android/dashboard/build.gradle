@@ -2,56 +2,26 @@ import co.joebirch.minimise.buildsrc.Deps
 import co.joebirch.minimise.buildsrc.Versions
 
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'dagger.hilt.android.plugin'
-apply plugin: 'kotlin-kapt'
-kapt {
-    correctErrorTypes = true
-    useBuildCache = true
-}
-
-apply plugin: 'kotlin-android-extensions'
-androidExtensions {
-    experimental = true
-}
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+apply plugin: 'com.google.dagger.hilt.android'
+apply plugin: 'com.google.devtools.ksp'
 
 android {
+    namespace = 'co.joebirch.minimise.dashboard'
+
     buildFeatures {
-        compose true
+        compose = true
     }
-    compileSdkVersion Versions.compileSdk
+    compileSdk = Versions.compileSdk
 
     defaultConfig {
-        minSdkVersion Versions.minSdk
-        targetSdkVersion Versions.targetSdk
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
+        minSdk = Versions.minSdk
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
-        useIR = true
-    }
-
-    composeOptions {
-        kotlinCompilerVersion Deps.Kotlin.version
-        kotlinCompilerExtensionVersion Deps.Compose.version
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 
@@ -62,6 +32,7 @@ dependencies {
     implementation project(':shared:SharedDashboard')
     implementation project(':platform_android:common-ui')
 
+    implementation platform(Deps.Compose.bom)
     implementation Deps.Compose.icons
     implementation Deps.Compose.runtime
     implementation Deps.Compose.layout
@@ -77,12 +48,9 @@ dependencies {
     implementation Deps.AndroidX.coreKtx
 
     implementation Deps.Google.Hilt.hilt
-    implementation Deps.Google.Hilt.viewmodel
-    kapt Deps.Google.Hilt.hiltCompiler
+    ksp Deps.Google.Hilt.hiltCompiler
 
     implementation Deps.Google.material
-
-    implementation Deps.Kotlin.stdLib
 
     implementation Deps.Lifecycle.common
     implementation Deps.Lifecycle.viewModelKtx

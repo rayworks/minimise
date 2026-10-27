@@ -5,17 +5,17 @@ import co.joebirch.minimise.SignUpMutation
 import co.joebirch.minimise.authentication.model.AuthenticationModel
 
 fun SignInQuery.Login.toAuthenticationModel(): AuthenticationModel {
-    return this.asAuthData?.let {
+    return this.onAuthData?.let {
         AuthenticationModel(it.token)
     } ?: run {
-        AuthenticationModel(message = this.asAuthenticationError?.message)
+        AuthenticationModel(message = this.onAuthenticationError?.message)
     }
 }
 
 fun SignUpMutation.CreateUser.toAuthenticationModel(): AuthenticationModel {
-    return this.asAuthData?.let {
+    return this.onAuthData?.let {
         AuthenticationModel(it.token)
     } ?: run {
-        AuthenticationModel(message = this.asAuthenticationError?.message)
+        AuthenticationModel(message = this.onAuthenticationError?.message)
     }
 }

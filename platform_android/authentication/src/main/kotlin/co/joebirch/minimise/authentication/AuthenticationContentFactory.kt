@@ -65,7 +65,7 @@ private fun Authentication(
                 modifier = Modifier
                     .width(240.dp)
                     .align(Alignment.CenterHorizontally)
-                    .focusModifier()
+                    .focusTarget()
                     .focusable(true)
                     .focusRequester(titleFocusRequest),
                 text = if (viewState.authenticationMode == AuthenticateMode.SignUp) {
